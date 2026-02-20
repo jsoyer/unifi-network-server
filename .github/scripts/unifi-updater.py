@@ -13,8 +13,7 @@ README = "README.md"
 
 def fetch(url: str) -> bytes:
     req = urllib.request.Request(
-        url,
-        headers={"User-Agent": "Mozilla/5.0 (GitHub Actions UniFi Updater)"}
+        url, headers={"User-Agent": "Mozilla/5.0 (GitHub Actions UniFi Updater)"}
     )
     with urllib.request.urlopen(req, timeout=30) as resp:
         return resp.read()
@@ -82,7 +81,8 @@ def parse_rss_latest(feed_bytes):
 
     # 1. Prefer "stable" (no beta/rc)
     stable = [
-        r for r in releases
+        r
+        for r in releases
         if not any(tag in r["title_lc"] for tag in ("beta", " rc", "release candidate"))
     ]
     if stable:
@@ -129,7 +129,7 @@ def update_readme(version: str, date_str: str, link: str) -> None:
         src = f.read()
 
     new_row = (
-        f"| [`latest` `v{version}`](https://github.com/jacobalberty/unifi-docker/blob/master/Dockerfile) "
+        f"| [`latest` `v{version}`](https://github.com/jsoyer/unifi-docker/blob/master/Dockerfile) "
         f"| Current Stable: Version {version} as of {date_str} "
         f"| [Change Log {version}]({link}) |"
     )

@@ -6,7 +6,7 @@ on:
 
 env:
   TEST_TAG: jsoyer/unifi:test
-  PKGURL: https://dl.ui.com/unifi/6.5.55/unifi_sysvinit_all.deb
+  PKGURL: https://dl.ui.com/unifi/10.1.85/unifi_sysvinit_all.deb
 
 jobs:
   build:
