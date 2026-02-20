@@ -14,7 +14,7 @@ env:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu:24.04
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -75,4 +75,3 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
-
