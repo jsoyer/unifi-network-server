@@ -5,12 +5,12 @@ version: 2
 updates:
   - package-ecosystem: github-actions
     directory: /
-    schedule: {interval: monthly}
-    reviewers: [jacobalberty]
-    assignees: [jacobalberty]
+    schedule: { interval: monthly }
+    reviewers: [jsoyer]
+    assignees: [jsoyer]
 
   - package-ecosystem: docker
     directory: /
-    schedule: {interval: monthly}
-    reviewers: [jacobalberty]
-    assignees: [jacobalberty]
+    schedule: { interval: monthly }
+    reviewers: [jsoyer]
+    assignees: [jsoyer]

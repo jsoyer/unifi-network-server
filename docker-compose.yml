@@ -1,4 +1,4 @@
-version: '2.3'
+version: "2.3"
 services:
   mongo:
     image: mongo:3.6
@@ -10,7 +10,7 @@ services:
       - db:/data/db
       - dbcfg:/data/configdb
   controller:
-    image: "jacobalberty/unifi:${TAG:-latest}"
+    image: "jsoyer/unifi:${TAG:-latest}"
     container_name: ${COMPOSE_PROJECT_NAME}_controller
     depends_on:
       - mongo
