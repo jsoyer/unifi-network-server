@@ -10,6 +10,10 @@ on:
     tags:
       - "v*.*.*"
 
+permissions:
+  contents: read
+  packages: write
+
 env:
   TEST_TAG: jsoyer/unifi:test
   PKGURL: https://dl.ui.com/unifi/10.1.85/unifi_sysvinit_all.deb
@@ -17,9 +21,6 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
     steps:
       - name: Checkout
         uses: actions/checkout@v6
