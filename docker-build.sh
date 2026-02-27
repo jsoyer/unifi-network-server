@@ -47,6 +47,11 @@ if [ -d "/usr/local/docker/pre_build/$(dpkg --print-architecture)" ]; then
     find "/usr/local/docker/pre_build/$(dpkg --print-architecture)" -type f -exec '{}' \;
 fi
 
+# Add MongoDB 7.0 repo (required by unifi, not available in Ubuntu 24.04 default repos)
+curl -fsSL https://www.mongodb.org/static/pgp/server-7.0.asc | gpg --dearmor -o /usr/share/keyrings/mongodb-server-7.0.gpg
+echo "deb [ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-7.0.gpg ] https://repo.mongodb.org/apt/ubuntu noble/mongodb-org/7.0 multiverse" | tee /etc/apt/sources.list.d/mongodb-org-7.0.list
+apt-get update
+
 curl -L -o ./unifi.deb "${1}"
 apt -qy install ./unifi.deb
 rm -f ./unifi.deb
