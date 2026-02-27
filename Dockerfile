@@ -47,9 +47,12 @@ COPY docker-healthcheck.sh /usr/local/bin/
 COPY docker-build.sh /usr/local/bin/
 COPY functions /usr/unifi/functions
 COPY import_cert /usr/unifi/init.d/
+COPY examples/fake-9080-server/01-fake-9080-server /usr/unifi/init.d/
+COPY examples/fake-9080-server/SimpleHttpServer.java /usr/unifi/init.d/
 COPY pre_build /usr/local/docker/pre_build
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh \
     && chmod +x /usr/unifi/init.d/import_cert \
+    && chmod +x /usr/unifi/init.d/01-fake-9080-server \
     && chmod +x /usr/local/bin/docker-healthcheck.sh \
     && chmod +x /usr/local/bin/docker-build.sh \
     && chmod -R +x /usr/local/docker/pre_build
