@@ -1,4 +1,4 @@
-FROM golang:1.24-noble AS permset
+FROM golang:1.24-bookworm AS permset
 WORKDIR /src
 RUN git clone https://github.com/jsoyer/permset.git /src && \
     mkdir -p /out && \
