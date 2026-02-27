@@ -10,7 +10,7 @@ services:
       - db:/data/db
       - dbcfg:/data/configdb
   controller:
-    image: "jsoyer/unifi:${TAG:-latest}"
+    image: "jsoyer/unifi-network-server:${TAG:-latest}"
     container_name: ${COMPOSE_PROJECT_NAME}_controller
     depends_on:
       - mongo

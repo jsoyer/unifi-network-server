@@ -5,7 +5,7 @@ on:
     types: [opened, synchronize, reopened]
 
 env:
-  TEST_TAG: jsoyer/unifi:test
+  TEST_TAG: jsoyer/unifi-network-server:test
   PKGURL: https://dl.ui.com/unifi/10.1.85/unifi_sysvinit_all.deb
 
 jobs:
@@ -17,7 +17,7 @@ jobs:
       - name: Prepare
         id: prep
         run: |
-          DOCKER_IMAGE=jsoyer/unifi
+          DOCKER_IMAGE=jsoyer/unifi-network-server
           VERSION=noop
           if [ "${{ github.event_name }}" = "schedule" ]; then
             VERSION=nightly

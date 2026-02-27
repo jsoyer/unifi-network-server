@@ -15,7 +15,7 @@ permissions:
   packages: write
 
 env:
-  TEST_TAG: jsoyer/unifi:test
+  TEST_TAG: jsoyer/unifi-network-server:test
   PKGURL: https://dl.ui.com/unifi/10.1.85/unifi_sysvinit_all.deb
 
 jobs:
@@ -66,7 +66,7 @@ jobs:
             type=semver,pattern=v{{major}}.{{minor}}
             type=ref,event=branch
           images: |
-            jsoyer/unifi
+            jsoyer/unifi-network-server
             ghcr.io/${{ github.repository }}
       - name: Build container image
         uses: docker/build-push-action@v6

@@ -129,7 +129,7 @@ def update_readme(version: str, date_str: str, link: str) -> None:
         src = f.read()
 
     new_row = (
-        f"| [`latest` `v{version}`](https://github.com/jsoyer/unifi-docker/blob/master/Dockerfile) "
+        f"| [`latest` `v{version}`](https://github.com/jsoyer/unifi-network-server/blob/master/Dockerfile) "
         f"| Current Stable: Version {version} as of {date_str} "
         f"| [Change Log {version}]({link}) |"
     )

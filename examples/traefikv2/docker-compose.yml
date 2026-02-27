@@ -1,6 +1,6 @@
 services:
   controller:
-    image: jsoyer/unifi:$TAG_NAME
+    image: jsoyer/unifi-network-server:$TAG_NAME
     container_name: unifi
     networks:
       - unifi

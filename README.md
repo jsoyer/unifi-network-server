@@ -1,4 +1,4 @@
-# Unifi-in-Docker (unifi-docker) 🐳
+# Unifi-in-Docker (unifi-network-server) 🐳
 
 This is a fork of [jacobalberty/unifi-docker](https://github.com/jacobalberty/unifi-docker). Huge thanks to **Jacob Alberty** for his amazing work on this project! 🙌
 
@@ -61,7 +61,7 @@ docker run -d --init \
    -v ~/unifi:/unifi \
    --user unifi \
    --name unifi \
-   jsoyer/unifi
+   jsoyer/unifi-network-server
 ```
 
 In a minute or two, (after Unifi Controller starts up) you can go to
@@ -125,36 +125,36 @@ to the directory `/unifi`inside the container.
 If you created the directory elsewhere, modify the `~/unifi` part of this option to match.
 See the [Volumes](#volumes) discussion for other volumes used by Unifi Controller.
 - `--user unifi` - Run as a non-root user. See the [Run as non-root User](#run-as-non-root-user) discussion below
-- `jsoyer/unifi` - the name of the container to use.
-The `jsoyer...` image is retrieved from [Dockerhub.](https://hub.docker.com/r/jsoyer/unifi)
+- `jsoyer/unifi-network-server` - the name of the container to use.
+The `jsoyer...` image is retrieved from [Dockerhub.](https://hub.docker.com/r/jsoyer/unifi-network-server)
 The [Current Information](#current-information) section below discusses the versions/tags that are available.
 
 ## ℹ️ Current Information
 
-The current tested version of unifi-docker is listed in the table below. 
+The current tested version of unifi-network-server is listed in the table below. 
 You can choose the version of Unifi Controller in the `docker run ...` command.
 In Docker terminology, these versions are specified by "tags".
 
-For example, in this project the container named `jsoyer/unifi`
+For example, in this project the container named `jsoyer/unifi-network-server`
 (with no "tag")
 provides the most recent stable release.
 The table below lists recent versions.
 
-The `rc` tag (for example, `jsoyer/unifi:rc`)
+The `rc` tag (for example, `jsoyer/unifi-network-server:rc`)
 uses the most recent Release Candidate from the UniFi APT repository.
 
-You may also specify a version number (e.g., `jsoyer/unifi:stable6`)
+You may also specify a version number (e.g., `jsoyer/unifi-network-server:stable6`)
 to get a specific version number, as shown in the table below.
 
 _Note:_ In Docker, specifying an image with no tag 
-(e.g., `jsoyer/unifi`) gets the "latest" tag.
+(e.g., `jsoyer/unifi-network-server`) gets the "latest" tag.
 For Unifi-in-Docker, this uses the most recent stable version.
 
 | Tag                                                                                         | Description                                       | Changelog                                                                                                                        |
 |---------------------------------------------------------------------------------------------|---------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------|
-| [`latest` `v10.1.85`](https://github.com/jsoyer/unifi-docker/blob/master/Dockerfile) | Current Stable: Version 10.1.85 as of 2026-02-11 | [Change Log 10.1.85](https://community.ui.com/releases/UniFi-Network-Application-10-1-85/364f40ee-6976-4299-803e-89e111020f91) |
-| [`stable-6`](https://github.com/jsoyer/unifi-docker/blob/stable-6/Dockerfile)         | Final stable version 6 (6.5.55)                   | [Change Log 6.5.55](https://community.ui.com/releases/UniFi-Network-Application-6-5-55/48c64137-4a4a-41f7-b7e4-3bee505ae16e)     |
-| [`stable-5`](https://github.com/jsoyer/unifi-docker/blob/stable-5/Dockerfile)         | Final stable version 5 (5.4.23)                   | [Change Log 5.14.23](https://community.ui.com/releases/UniFi-Network-Controller-5-14-23/daf90732-30ad-48ee-81e7-1dcb374eba2a)    |
+| [`latest` `v10.1.85`](https://github.com/jsoyer/unifi-network-server/blob/master/Dockerfile) | Current Stable: Version 10.1.85 as of 2026-02-11 | [Change Log 10.1.85](https://community.ui.com/releases/UniFi-Network-Application-10-1-85/364f40ee-6976-4299-803e-89e111020f91) |
+| [`stable-6`](https://github.com/jsoyer/unifi-network-server/blob/stable-6/Dockerfile)         | Final stable version 6 (6.5.55)                   | [Change Log 6.5.55](https://community.ui.com/releases/UniFi-Network-Application-6-5-55/48c64137-4a4a-41f7-b7e4-3bee505ae16e)     |
+| [`stable-5`](https://github.com/jsoyer/unifi-network-server/blob/stable-5/Dockerfile)         | Final stable version 5 (5.4.23)                   | [Change Log 5.14.23](https://community.ui.com/releases/UniFi-Network-Controller-5-14-23/daf90732-30ad-48ee-81e7-1dcb374eba2a)    |
 
 ### 🖥️ multiarch
 
@@ -188,7 +188,7 @@ _Hint: Port 10001 should be forwareded to make it work._
 
 ### Other
 
-See [Side Projects](https://github.com/jsoyer/unifi-docker/blob/master/Side-Projects.md#other-techniques-for-adoption) for
+See [Side Projects](https://github.com/jsoyer/unifi-network-server/blob/master/Side-Projects.md#other-techniques-for-adoption) for
 other techniques to get Unifi devices to adopt your
 new Unifi Controller.
 
@@ -366,9 +366,9 @@ If the output contains `id-ec` as shown in the example, then your certificate mi
 ## ℹ️ Additional Information
 
 This document describes everything you need to get Unifi-in-Docker running.
-The [Side Projects and Background Info](https://github.com/jsoyer/unifi-docker/blob/master/Side-Projects.md) page
+The [Side Projects and Background Info](https://github.com/jsoyer/unifi-network-server/blob/master/Side-Projects.md) page
 provides more about what we've learned while developing Unifi-in-Docker.
 
 ## 📝 TODO
 
-This list is empty for now, please [add your suggestions](https://github.com/jsoyer/unifi-docker/issues).
+This list is empty for now, please [add your suggestions](https://github.com/jsoyer/unifi-network-server/issues).
