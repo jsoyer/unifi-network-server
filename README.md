@@ -2,6 +2,10 @@
 
 This is a fork of [jacobalberty/unifi-docker](https://github.com/jacobalberty/unifi-docker). Huge thanks to **Jacob Alberty** for his amazing work on this project! 🙌
 
+> **Note:** This project was previously known as `unifi-docker` (GitHub) and `jsoyer/unifi` (Docker Hub).
+> It has been renamed to `unifi-network-server` / `jsoyer/unifi-network-server`.
+> Please update your `docker-compose.yml` or `docker run` commands accordingly.
+
 This repo contains a Dockerized version of [Ubiqiti Network's](https://www.ubnt.com/) Unifi Controller.
 
 **Why bother?** Using Docker, you can stop worrying about version
