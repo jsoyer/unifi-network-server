@@ -36,10 +36,18 @@ apt-get install -qy --no-install-recommends \
     dirmngr \
     gpg \
     gpg-agent \
-    openjdk-21-jre-headless \
     procps \
     libcap2-bin \
     tzdata
+
+# Add Adoptium repo for temurin-25-jdk
+curl -fsSL https://packages.adoptium.net/artifactory/api/gpg/key/public | \
+    gpg --dearmor -o /etc/apt/trusted.gpg.d/adoptium.gpg
+echo "deb https://packages.adoptium.net/artifactory/deb $(awk -F= '/^VERSION_CODENAME/{print$2}' /etc/os-release) main" | \
+    tee /etc/apt/sources.list.d/adoptium.list
+apt-get update
+apt-get install -qy --no-install-recommends temurin-25-jdk
+
 echo 'deb https://www.ui.com/downloads/unifi/debian stable ubiquiti' | tee /etc/apt/sources.list.d/100-ubnt-unifi.list
 tryfail apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 06E85760C0A52C50
 
