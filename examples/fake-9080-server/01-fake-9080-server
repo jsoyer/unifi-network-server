@@ -10,7 +10,7 @@ log 'Run fake 9080 server in background'
 
 # Run a loop in the background
 (
-    until $(which java) /unifi/init.d/SimpleHttpServer.java; do
+    until $(which java) /usr/unifi/SimpleHttpServer.java; do
         log "Server crashed with exit code $?. Respawning..."
         sleep 2
     done
