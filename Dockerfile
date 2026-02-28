@@ -35,7 +35,7 @@ ENV BASEDIR=/usr/lib/unifi \
 # but for now while shoehorning gosu in it is seperate
 RUN set -eux; \
     apt-get update; \
-    apt-get install -y gosu; \
+    apt-get install -y gosu python3; \
     rm -rf /var/lib/apt/lists/*
 
 RUN mkdir -p /usr/unifi \
