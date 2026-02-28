@@ -2,7 +2,7 @@ FROM golang:1.24-bookworm AS permset
 WORKDIR /src
 RUN git clone https://github.com/jsoyer/permset.git /src && \
     mkdir -p /out && \
-    go build -ldflags "-X main.chownDir=/unifi" -o /out/permset
+    CGO_ENABLED=0 go build -ldflags "-X main.chownDir=/unifi" -o /out/permset
 
 FROM ubuntu:20.04
 
