@@ -53,7 +53,7 @@ JVM_MAX_HEAP_SIZE=${JVM_MAX_HEAP_SIZE:-1024M}
 #ENABLE_UNIFI=yes
 
 
-MONGOLOCK="${DATAPATH}/db/mongod.lock"
+MONGOLOCK="${DATADIR}/db/mongod.lock"
 JVM_EXTRA_OPTS="${JVM_EXTRA_OPTS} --add-opens=java.base/java.time=ALL-UNNAMED --enable-native-access=ALL-UNNAMED -Dunifi.datadir=${DATADIR} -Dunifi.logdir=${LOGDIR} -Dunifi.rundir=${RUNDIR}"
 PIDFILE=/var/run/unifi/unifi.pid
 

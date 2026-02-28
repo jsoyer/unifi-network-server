@@ -373,6 +373,8 @@ This document describes everything you need to get Unifi-in-Docker running.
 The [Side Projects and Background Info](https://github.com/jsoyer/unifi-network-server/blob/master/Side-Projects.md) page
 provides more about what we've learned while developing Unifi-in-Docker.
 
-## 📝 TODO
+## 📝 Roadmap
 
-This list is empty for now, please [add your suggestions](https://github.com/jsoyer/unifi-network-server/issues).
+- **Upgrade external MongoDB from 3.6 to 4.4+** — MongoDB 3.6 is EOL. Migrating to 4.4 (or 7.0) would bring better crash recovery (journaling improvements), performance, and long-term support. Requires validating compatibility with the UniFi version in use.
+
+For other suggestions, please [open an issue](https://github.com/jsoyer/unifi-network-server/issues).
