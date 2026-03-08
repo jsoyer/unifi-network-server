@@ -6,4 +6,4 @@ if [ -f "${SYSPROPS_FILE}" ]; then
 fi
 PORT=${SYSPROPS_PORT:-8443}
 
-curl --max-time 5 -kILs --fail https://localhost:${PORT}
+curl --max-time 5 -ks --fail https://localhost:${PORT}/status | grep -q '"up":true'

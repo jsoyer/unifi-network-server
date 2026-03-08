@@ -36,7 +36,8 @@ apt-get update
 apt-get install -qy --no-install-recommends temurin-25-jdk
 
 echo 'deb https://www.ui.com/downloads/unifi/debian stable ubiquiti' | tee /etc/apt/sources.list.d/100-ubnt-unifi.list
-tryfail apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 06E85760C0A52C50
+curl -fsSL "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x06E85760C0A52C50" | \
+    gpg --dearmor -o /etc/apt/trusted.gpg.d/ubiquiti.gpg
 
 if [ -d "/usr/local/docker/pre_build/$(dpkg --print-architecture)" ]; then
     find "/usr/local/docker/pre_build/$(dpkg --print-architecture)" -type f -exec '{}' \;

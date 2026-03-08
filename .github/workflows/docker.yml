@@ -1,9 +1,10 @@
-# Publish Docker image workflow
 name: Publish Docker image
+
 on:
   workflow_dispatch:
   push:
     branches:
+      - "main"
       - "master"
       - "beta"
       - "hotfix/*"
@@ -13,6 +14,8 @@ on:
 permissions:
   contents: read
   packages: write
+  id-token: write
+  security-events: write
 
 env:
   TEST_TAG: jsoyer/unifi-network-server:test
@@ -23,38 +26,47 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
+
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
         with:
           platforms: all
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-      - name: Login to GitHub Container Resgistry
+
+      - name: Login to GitHub Container Registry
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Login to DockerHub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-      - name: Build and export to Docker
+
+      - name: Build and export to Docker (smoke test)
         uses: docker/build-push-action@v6
         with:
           context: .
           load: true
           tags: ${{ env.TEST_TAG }}
-      - name: Test image
+
+      - name: Smoke test
         run: |
-          export PKGURL=${{env.PKGURL}} &&
-          docker run -d --env PKGURL --rm --name unifitest ${{env.TEST_TAG}} &&
-          sleep 35 &&
-          for i in $(seq 1 10); do [ $(docker inspect --format='{{json .State.Health.Status}}' unifitest ) == \"healthy\" ] && break ||  sleep 35; done &&
-          [ $(docker inspect --format='{{json .State.Health.Status}}' unifitest ) == \"healthy\" ] &&
+          docker run -d --env PKGURL --rm --name unifitest ${{ env.TEST_TAG }}
+          sleep 35
+          for i in $(seq 1 10); do
+            status=$(docker inspect --format='{{json .State.Health.Status}}' unifitest)
+            [ "$status" = '"healthy"' ] && break || sleep 35
+          done
+          [ "$(docker inspect --format='{{json .State.Health.Status}}' unifitest)" = '"healthy"' ]
           docker stop unifitest
+
       - name: Extract metadata (tags, labels) for Docker
         id: meta
         uses: docker/metadata-action@v5
@@ -68,16 +80,48 @@ jobs:
           images: |
             jsoyer/unifi-network-server
             ghcr.io/${{ github.repository }}
-      - name: Build container image
+
+      - name: Build and push container image
+        id: build
         uses: docker/build-push-action@v6
         with:
           context: .
-          provenance: false
+          provenance: true
           platforms: linux/arm64/v8,linux/amd64
           push: true
           cache-from: type=gha
           cache-to: type=gha,mode=max
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-      - name: Image digest
-        run: echo ${{ steps.docker_build.outputs.digest }}
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ghcr.io/${{ github.repository }}:latest
+          format: sarif
+          output: trivy-results.sarif
+          severity: CRITICAL,HIGH
+
+      - name: Upload Trivy results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: trivy-results.sarif
+
+      - name: Install cosign
+        uses: sigstore/cosign-installer@v3
+
+      - name: Sign image with cosign (keyless)
+        run: |
+          cosign sign --yes ghcr.io/${{ github.repository }}@${{ steps.build.outputs.digest }}
+
+      - name: Generate SBOM with syft
+        uses: anchore/sbom-action@v0
+        with:
+          image: ghcr.io/${{ github.repository }}:latest
+          format: spdx-json
+          output-file: sbom.spdx.json
+
+      - name: Attach SBOM to image
+        run: |
+          cosign attach sbom --sbom sbom.spdx.json ghcr.io/${{ github.repository }}@${{ steps.build.outputs.digest }}

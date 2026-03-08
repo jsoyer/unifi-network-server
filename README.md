@@ -387,33 +387,32 @@ provides more about what we've learned while developing Unifi-in-Docker.
 
 ### Medium priority
 
-- **Migrate CI from Travis CI to GitHub Actions** — Travis CI is no longer actively used for this project. GitHub Actions would unify build, multi-arch image publishing to GHCR, and smoke testing.
+- ~~**Migrate CI from Travis CI to GitHub Actions**~~ ✅ — `build.yml` (PR) and `docker.yml` (publish) fully rewritten with modern action versions, fixed deprecated syntax, and multi-platform builds on `main`.
 
-- **Add image vulnerability scanning (Trivy)** — Integrate automated CVE scanning on each build to catch vulnerabilities in base image packages.
+- ~~**Add image vulnerability scanning (Trivy)**~~ ✅ — Trivy runs on every PR and every push to `main`, results uploaded to the GitHub Security tab as SARIF.
 
-- **Replace deprecated `apt-key adv` with signed keyring** — The Ubiquiti repo key is added via the deprecated `apt-key adv` method. Migrate to `/etc/apt/trusted.gpg.d/ubiquiti.gpg` (consistent with how the Adoptium key is already handled).
+- ~~**Replace deprecated `apt-key adv` with signed keyring**~~ ✅ — Ubiquiti repo key now fetched via `curl | gpg --dearmor` into `/etc/apt/trusted.gpg.d/ubiquiti.gpg`.
 
-- **Automate UniFi version updates with Renovate** — The `PKGURL` in the Dockerfile is hardcoded to a specific UniFi version. Renovate (or a GitHub Actions workflow) could detect new UniFi releases and open a PR automatically, keeping the image up to date without manual intervention.
+- ~~**Automate UniFi version updates**~~ ✅ — Already implemented via `.github/workflows/update.yml` and `.github/scripts/unifi-updater.py`, which poll the UniFi RSS feed daily and open a PR automatically when a new version is released.
 
-- **Sign released images with cosign** — Adding Sigstore/cosign signatures to published images would allow users to verify image integrity and origin, improving supply chain security.
+- ~~**Sign released images with cosign**~~ ✅ — Keyless cosign signing added to the publish workflow. The image digest is signed via Sigstore/Fulcio on every push to `main`.
 
-- **Add log rotation configuration** — UniFi logs written to `/unifi/log/` are not rotated by default. On long-running installs, `server.log` can grow to several GB. A `logrotate` config or a documented volume size limit would prevent disk exhaustion.
-
+- **Add log rotation for `/unifi/log/`** — Docker stdout logs are now capped (10 MB / 3 files via `json-file` driver). The UniFi application log files inside the volume (`/unifi/log/server.log`) are still not rotated and can grow unbounded on long-running installs. A `logrotate` config or init.d script is still needed.
 
 ### Low priority
 
-- **Add memory limits in docker-compose** — Without `mem_limit`, UniFi can consume all available RAM on constrained hardware (e.g. Raspberry Pi). Recommended defaults: 1-2 GB for the controller, 512 MB for MongoDB.
+- ~~**Add memory limits in docker-compose**~~ ✅ — `mem_limit: 2g` on the controller, `mem_limit: 512m` on MongoDB.
 
-- **Add `depends_on` healthcheck for MongoDB** — The controller currently starts as soon as the mongo container exists, not when MongoDB is actually ready to accept connections. Using `condition: service_healthy` with a proper healthcheck on the mongo service would eliminate connection errors on first boot.
+- ~~**Add `depends_on` healthcheck for MongoDB**~~ ✅ — MongoDB now exposes a `healthcheck` using `db.adminCommand('ping')`, and the controller uses `condition: service_healthy`.
 
 - **Document MongoDB authentication** — The mongo container runs without credentials. It is isolated on an internal Docker network, but adding `MONGO_INITDB_ROOT_USERNAME/PASSWORD` and updating the `DB_URI` would be a worthwhile hardening step, especially for internet-facing hosts.
 
-- **Improve healthcheck to use UniFi API** — The current healthcheck only verifies TCP connectivity on port 8443. Querying `/status` from the UniFi API would provide a true application-level health signal.
+- ~~**Improve healthcheck to use UniFi API**~~ ✅ — Healthcheck now hits `/status` and checks for `"up":true` in the response instead of just testing TCP connectivity.
 
-- **Document `./backup` directory permissions in README** — The host-side `./backup` bind mount must be owned by `999:999` (unifi). Docker creates it as root if it does not exist, silently breaking backup import. Worth calling out explicitly.
+- ~~**Document `./backup` directory permissions**~~ ✅ — The entrypoint now creates the directory automatically with correct permissions on startup. If the directory already exists as root-owned on the host, run: `chown -R 999:999 backup/`
 
-- **Add `.env.example` file** — Several useful environment variables (`JVM_MAX_HEAP_SIZE`, `LOTSOFDEVICES`, `SYSTEM_IP`, `UNIFI_STDOUT`, `TZ`, etc.) are only documented in the README. A commented `.env.example` next to `docker-compose.yml` would make them more discoverable for new users.
+- ~~**Add `.env.example` file**~~ ✅ — Added. Copy `.env.example` to `.env` and uncomment the variables you need.
 
-- **Add SBOM generation** — Producing a Software Bill of Materials (e.g. with `syft`) on each build would give users a full inventory of packages included in the image, useful for compliance and vulnerability tracking.
+- ~~**Add SBOM generation**~~ ✅ — `syft` generates an SPDX-JSON SBOM on every publish, attached to the image via `cosign attach sbom`.
 
 For other suggestions, please [open an issue](https://github.com/jsoyer/unifi-network-server/issues).

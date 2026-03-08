@@ -5,18 +5,32 @@ services:
     networks:
       - unifi
     restart: always
+    mem_limit: 512m
     volumes:
       - db:/data/db
       - dbcfg:/data/configdb
+    healthcheck:
+      test: ["CMD", "mongo", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
   controller:
     image: "ghcr.io/jsoyer/unifi-network-server:${TAG:-latest}"
     container_name: ${COMPOSE_PROJECT_NAME}_controller
     depends_on:
-      - mongo
+      mongo:
+        condition: service_healthy
     init: true
     networks:
       - unifi
     restart: always
+    mem_limit: 2g
     volumes:
       - dir:/unifi
       - data:/unifi/data
@@ -42,6 +56,11 @@ services:
       - "8880:8880/tcp" # HTTP portal redirection
       - "8843:8843/tcp" # HTTPS portal redirection
       - "10001:10001/udp" # AP discovery
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
   logs:
     image: bash
     container_name: ${COMPOSE_PROJECT_NAME}_logs
