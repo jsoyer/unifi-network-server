@@ -27,7 +27,7 @@ exit_handler() {
     if [ -f ${MONGOLOCK} ]; then
         mongo localhost:${MONGOPORT} --eval "db.getSiblingDB('admin').shutdownServer()" >/dev/null 2>&1
     fi
-    exit ${?};
+    exit 0;
 }
 
 trap 'kill ${!}; exit_handler' SIGHUP SIGINT SIGQUIT SIGTERM

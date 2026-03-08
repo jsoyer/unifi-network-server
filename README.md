@@ -396,6 +396,12 @@ provides more about what we've learned while developing Unifi-in-Docker.
 
 ### Low priority
 
+- **Add memory limits in docker-compose** — Without `mem_limit`, UniFi can consume all available RAM on constrained hardware (e.g. Raspberry Pi). Recommended defaults: 1-2 GB for the controller, 512 MB for MongoDB.
+
+- **Add `depends_on` healthcheck for MongoDB** — The controller currently starts as soon as the mongo container exists, not when MongoDB is actually ready to accept connections. Using `condition: service_healthy` with a proper healthcheck on the mongo service would eliminate connection errors on first boot.
+
+- **Document MongoDB authentication** — The mongo container runs without credentials. It is isolated on an internal Docker network, but adding `MONGO_INITDB_ROOT_USERNAME/PASSWORD` and updating the `DB_URI` would be a worthwhile hardening step, especially for internet-facing hosts.
+
 - **Improve healthcheck to use UniFi API** — The current healthcheck only verifies TCP connectivity on port 8443. Querying `/status` from the UniFi API would provide a true application-level health signal.
 
 - **Document `./backup` directory permissions in README** — The host-side `./backup` bind mount must be owned by `999:999` (unifi). Docker creates it as root if it does not exist, silently breaking backup import. Worth calling out explicitly.

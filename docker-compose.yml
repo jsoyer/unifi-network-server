@@ -1,4 +1,3 @@
-version: "2.3"
 services:
   mongo:
     image: mongo:3.6
@@ -28,6 +27,7 @@ services:
       # Mount local folder for backups and autobackups
       - ./backup:/unifi/data/backup
     user: unifi
+    stop_grace_period: 30s
     sysctls:
       net.ipv4.ip_unprivileged_port_start: 0
     environment:
