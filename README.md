@@ -392,7 +392,6 @@ provides more about what we've learned while developing Unifi-in-Docker.
 
 - **Replace deprecated `apt-key adv` with signed keyring** — The Ubiquiti repo key is added via the deprecated `apt-key adv` method. Migrate to `/etc/apt/trusted.gpg.d/ubiquiti.gpg` (consistent with how the Adoptium key is already handled).
 
-- **Downgrade Java from Temurin 25 to 21 LTS** — Temurin 25 is not an LTS release. Temurin 21 is the current LTS and is officially supported by UniFi 10.x, reducing the risk of unexpected runtime behaviour.
 
 ### Low priority
 
