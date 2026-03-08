@@ -375,6 +375,29 @@ provides more about what we've learned while developing Unifi-in-Docker.
 
 ## 📝 Roadmap
 
-- **Upgrade external MongoDB from 3.6 to 4.4+** — MongoDB 3.6 is EOL. Migrating to 4.4 (or 7.0) would bring better crash recovery (journaling improvements), performance, and long-term support. Requires validating compatibility with the UniFi version in use.
+### High priority
+
+- **Upgrade base image from Ubuntu 20.04 to 24.04** — Ubuntu 20.04 reached EOL in April 2025 and no longer receives security patches. This is a prerequisite for the MongoDB upgrade below.
+
+- **Upgrade external MongoDB from 3.6 to 7.0** — MongoDB 3.6 is EOL since April 2022. MongoDB 7.0 brings journaling improvements, better crash recovery, and long-term support. Requires:
+  - Validating aarch64 (arm64) support — official MongoDB 7.0 packages for arm64/Ubuntu 24.04 need to be confirmed
+  - Validating armhf (32-bit ARM) support — MongoDB dropped official armhf support after 3.x; a community-maintained alternative may be required (similar to the current `pre_build/armhf/mongodb.sh` approach)
+  - Compatibility testing with the UniFi version in use
+
+### Medium priority
+
+- **Migrate CI from Travis CI to GitHub Actions** — Travis CI is no longer actively used for this project. GitHub Actions would unify build, multi-arch image publishing to GHCR, and smoke testing.
+
+- **Add image vulnerability scanning (Trivy)** — Integrate automated CVE scanning on each build to catch vulnerabilities in base image packages.
+
+- **Replace deprecated `apt-key adv` with signed keyring** — The Ubiquiti repo key is added via the deprecated `apt-key adv` method. Migrate to `/etc/apt/trusted.gpg.d/ubiquiti.gpg` (consistent with how the Adoptium key is already handled).
+
+- **Downgrade Java from Temurin 25 to 21 LTS** — Temurin 25 is not an LTS release. Temurin 21 is the current LTS and is officially supported by UniFi 10.x, reducing the risk of unexpected runtime behaviour.
+
+### Low priority
+
+- **Improve healthcheck to use UniFi API** — The current healthcheck only verifies TCP connectivity on port 8443. Querying `/status` from the UniFi API would provide a true application-level health signal.
+
+- **Document `./backup` directory permissions in README** — The host-side `./backup` bind mount must be owned by `999:999` (unifi). Docker creates it as root if it does not exist, silently breaking backup import. Worth calling out explicitly.
 
 For other suggestions, please [open an issue](https://github.com/jsoyer/unifi-network-server/issues).
