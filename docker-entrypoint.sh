@@ -195,6 +195,11 @@ if [[ "${@}" == "unifi" ]]; then
     if [ "${CUID}" == "0" ]; then
         chown "${UNIFI_UID}:${UNIFI_GID}" "${DATADIR}/backup"
     fi
+    # Ensure run dir exists and is writable — needed for mongod.pid and db.needsRepair
+    mkdir -p "${RUNDIR}"
+    if [ "${CUID}" == "0" ]; then
+        chown "${UNIFI_UID}:${UNIFI_GID}" "${RUNDIR}"
+    fi
     for key in "${!settings[@]}"; do
       confSet "$confFile" "$key" "${settings[$key]}"
     done
