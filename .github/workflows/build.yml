@@ -76,5 +76,8 @@ jobs:
     secrets: inherit
     with:
       status: failure
-      title: "Build failed on PR #${{ github.event.number }}"
-      message: "Docker build or tests failed for PR #${{ github.event.number }}.\n${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+      title: >-
+        Build failed on PR #${{ github.event.number }}
+      message: >-
+        Docker build or tests failed for PR #${{ github.event.number }}.
+        ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}

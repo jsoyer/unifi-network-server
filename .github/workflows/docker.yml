@@ -132,5 +132,10 @@ jobs:
     secrets: inherit
     with:
       status: ${{ needs.build.result }}
-      title: "Docker publish: ${{ needs.build.result }}"
-      message: "${{ needs.build.result == 'success' && 'Image published to GHCR and DockerHub.' || 'Docker publish failed.' }}\n${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+      title: >-
+        Docker publish: ${{ needs.build.result }}
+      message: >-
+        ${{ needs.build.result == 'success'
+            && 'Image published to GHCR and DockerHub.'
+            || 'Docker publish failed.' }}
+        ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}

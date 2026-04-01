@@ -74,5 +74,8 @@ jobs:
     secrets: inherit
     with:
       status: success
-      title: "UniFi v${{ needs.update-unifi.outputs.version }} available"
-      message: "A PR has been created to update UniFi Network Application to v${{ needs.update-unifi.outputs.version }}.\nhttps://github.com/${{ github.repository }}/pulls"
+      title: >-
+        UniFi v${{ needs.update-unifi.outputs.version }} available
+      message: >-
+        A PR has been created to update UniFi Network Application to v${{ needs.update-unifi.outputs.version }}.
+        https://github.com/${{ github.repository }}/pulls
