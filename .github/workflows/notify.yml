@@ -19,7 +19,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Discord
-        if: ${{ secrets.DISCORD_WEBHOOK_URL != '' }}
         env:
           WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
           TITLE: ${{ inputs.title }}
@@ -27,6 +26,7 @@ jobs:
           STATUS: ${{ inputs.status }}
         run: |
           set -euo pipefail
+          [ -z "$WEBHOOK_URL" ] && echo "DISCORD_WEBHOOK_URL not set, skipping" && exit 0
           color=$( [ "$STATUS" = "success" ] && echo 3066993 || echo 15158332 )
           payload=$(jq -n \
             --arg title "$TITLE" \
@@ -36,7 +36,6 @@ jobs:
           curl -sS -f -H "Content-Type: application/json" -d "$payload" "$WEBHOOK_URL"
 
       - name: Slack
-        if: ${{ secrets.SLACK_WEBHOOK_URL != '' }}
         env:
           WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
           TITLE: ${{ inputs.title }}
@@ -44,6 +43,7 @@ jobs:
           STATUS: ${{ inputs.status }}
         run: |
           set -euo pipefail
+          [ -z "$WEBHOOK_URL" ] && echo "SLACK_WEBHOOK_URL not set, skipping" && exit 0
           color=$( [ "$STATUS" = "success" ] && echo "good" || echo "danger" )
           payload=$(jq -n \
             --arg title "$TITLE" \
@@ -53,7 +53,6 @@ jobs:
           curl -sS -f -H "Content-Type: application/json" -d "$payload" "$WEBHOOK_URL"
 
       - name: Ntfy
-        if: ${{ secrets.NTFY_URL != '' }}
         env:
           NTFY_URL: ${{ secrets.NTFY_URL }}
           TITLE: ${{ inputs.title }}
@@ -61,6 +60,7 @@ jobs:
           STATUS: ${{ inputs.status }}
         run: |
           set -euo pipefail
+          [ -z "$NTFY_URL" ] && echo "NTFY_URL not set, skipping" && exit 0
           priority=$( [ "$STATUS" = "success" ] && echo "default" || echo "high" )
           tags=$( [ "$STATUS" = "success" ] && echo "white_check_mark" || echo "x" )
           curl -sS -f \
@@ -71,7 +71,6 @@ jobs:
             "$NTFY_URL"
 
       - name: Telegram
-        if: ${{ secrets.TELEGRAM_BOT_TOKEN != '' && secrets.TELEGRAM_CHAT_ID != '' }}
         env:
           BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
@@ -79,6 +78,7 @@ jobs:
           MESSAGE: ${{ inputs.message }}
         run: |
           set -euo pipefail
+          [ -z "$BOT_TOKEN" ] || [ -z "$CHAT_ID" ] && echo "Telegram secrets not set, skipping" && exit 0
           text=$(printf "<b>%s</b>\n%s" "$TITLE" "$MESSAGE")
           payload=$(jq -n \
             --arg chat_id "$CHAT_ID" \
@@ -89,14 +89,30 @@ jobs:
             "https://api.telegram.org/bot${BOT_TOKEN}/sendMessage"
 
       - name: Email
-        if: ${{ secrets.SMTP_SERVER != '' }}
-        uses: dawidd6/action-send-mail@v3
-        with:
-          server_address: ${{ secrets.SMTP_SERVER }}
-          server_port: ${{ secrets.SMTP_PORT }}
-          username: ${{ secrets.SMTP_USERNAME }}
-          password: ${{ secrets.SMTP_PASSWORD }}
-          subject: ${{ inputs.title }}
-          body: ${{ inputs.message }}
-          to: ${{ secrets.NOTIFY_EMAIL }}
-          from: ${{ secrets.SMTP_FROM }}
+        env:
+          SMTP_SERVER: ${{ secrets.SMTP_SERVER }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+          SMTP_USERNAME: ${{ secrets.SMTP_USERNAME }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          SMTP_FROM: ${{ secrets.SMTP_FROM }}
+          NOTIFY_EMAIL: ${{ secrets.NOTIFY_EMAIL }}
+          TITLE: ${{ inputs.title }}
+          MESSAGE: ${{ inputs.message }}
+        run: |
+          set -euo pipefail
+          [ -z "$SMTP_SERVER" ] && echo "SMTP_SERVER not set, skipping" && exit 0
+          sudo apt-get update -qq && sudo apt-get install -y -qq msmtp >/dev/null
+          cat > /tmp/msmtprc <<CONF
+          account default
+          host $SMTP_SERVER
+          port $SMTP_PORT
+          auth on
+          user $SMTP_USERNAME
+          password $SMTP_PASSWORD
+          from $SMTP_FROM
+          tls on
+          tls_starttls on
+          CONF
+          printf "Subject: %s\nTo: %s\nFrom: %s\n\n%s" \
+            "$TITLE" "$NOTIFY_EMAIL" "$SMTP_FROM" "$MESSAGE" \
+            | msmtp --file=/tmp/msmtprc "$NOTIFY_EMAIL"
