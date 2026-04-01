@@ -216,6 +216,91 @@ An example certificate import script is available at `/usr/unifi/init.d/import_c
 
 ---
 
+## 🔔 Notifications
+
+The CI/CD workflows can send notifications to multiple channels. Each channel is **opt-in** — configure only the secrets you need in **Settings > Secrets and variables > Actions**.
+
+| Event | Workflow | Notification |
+|---|---|---|
+| New UniFi version detected | `update.yml` | PR created with version info |
+| PR build failure | `build.yml` | Build/test failure details |
+| Docker publish (success or failure) | `docker.yml` | Publish result with run link |
+
+### Supported channels
+
+#### Discord
+
+| Secret | Value |
+|---|---|
+| `DISCORD_WEBHOOK_URL` | `https://discord.com/api/webhooks/...` |
+
+Create a webhook in **Server Settings > Integrations > Webhooks**.
+
+#### Slack
+
+| Secret | Value |
+|---|---|
+| `SLACK_WEBHOOK_URL` | `https://hooks.slack.com/services/...` |
+
+Create an [Incoming Webhook](https://api.slack.com/messaging/webhooks) in your Slack workspace.
+
+#### Ntfy
+
+| Secret | Value |
+|---|---|
+| `NTFY_URL` | `https://ntfy.sh/your-topic` or your self-hosted instance |
+
+See [ntfy.sh](https://ntfy.sh) for setup.
+
+#### Telegram
+
+| Secret | Value |
+|---|---|
+| `TELEGRAM_BOT_TOKEN` | `123456:ABC-DEF...` |
+| `TELEGRAM_CHAT_ID` | `-100123456789` |
+
+Create a bot via [@BotFather](https://t.me/BotFather) and get your chat ID via [@userinfobot](https://t.me/userinfobot).
+
+#### Email (SMTP)
+
+| Secret | Value |
+|---|---|
+| `SMTP_SERVER` | `smtp.gmail.com` |
+| `SMTP_PORT` | `587` |
+| `SMTP_USERNAME` | SMTP login |
+| `SMTP_PASSWORD` | SMTP password or app password |
+| `SMTP_FROM` | Sender address |
+| `NOTIFY_EMAIL` | Recipient address |
+
+For Gmail, use an [App Password](https://support.google.com/accounts/answer/185833) with 2FA enabled.
+
+### Quick setup with `gh`
+
+```bash
+# Discord
+gh secret set DISCORD_WEBHOOK_URL --body "https://discord.com/api/webhooks/..."
+
+# Slack
+gh secret set SLACK_WEBHOOK_URL --body "https://hooks.slack.com/services/..."
+
+# Ntfy
+gh secret set NTFY_URL --body "https://ntfy.sh/your-topic"
+
+# Telegram
+gh secret set TELEGRAM_BOT_TOKEN --body "123456:ABC-DEF..."
+gh secret set TELEGRAM_CHAT_ID --body "-100123456789"
+
+# Email
+gh secret set SMTP_SERVER --body "smtp.gmail.com"
+gh secret set SMTP_PORT --body "587"
+gh secret set SMTP_USERNAME --body "user@gmail.com"
+gh secret set SMTP_PASSWORD --body "app-password"
+gh secret set SMTP_FROM --body "user@gmail.com"
+gh secret set NOTIFY_EMAIL --body "dest@example.com"
+```
+
+---
+
 ## ⬆️ Upgrading UniFi Controller
 
 All configuration is stored in the mounted volumes — nothing is retained inside the container itself. Upgrading is simply a matter of pulling a new image:
