@@ -1,0 +1,102 @@
+name: Send notifications
+
+on:
+  workflow_call:
+    inputs:
+      status:
+        required: true
+        type: string
+        description: "'success' or 'failure'"
+      title:
+        required: true
+        type: string
+      message:
+        required: true
+        type: string
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Discord
+        if: ${{ secrets.DISCORD_WEBHOOK_URL != '' }}
+        env:
+          WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          TITLE: ${{ inputs.title }}
+          MESSAGE: ${{ inputs.message }}
+          STATUS: ${{ inputs.status }}
+        run: |
+          set -euo pipefail
+          color=$( [ "$STATUS" = "success" ] && echo 3066993 || echo 15158332 )
+          payload=$(jq -n \
+            --arg title "$TITLE" \
+            --arg desc "$MESSAGE" \
+            --argjson color "$color" \
+            '{embeds: [{title: $title, description: $desc, color: $color}]}')
+          curl -sS -f -H "Content-Type: application/json" -d "$payload" "$WEBHOOK_URL"
+
+      - name: Slack
+        if: ${{ secrets.SLACK_WEBHOOK_URL != '' }}
+        env:
+          WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          TITLE: ${{ inputs.title }}
+          MESSAGE: ${{ inputs.message }}
+          STATUS: ${{ inputs.status }}
+        run: |
+          set -euo pipefail
+          color=$( [ "$STATUS" = "success" ] && echo "good" || echo "danger" )
+          payload=$(jq -n \
+            --arg title "$TITLE" \
+            --arg text "$MESSAGE" \
+            --arg color "$color" \
+            '{attachments: [{title: $title, text: $text, color: $color}]}')
+          curl -sS -f -H "Content-Type: application/json" -d "$payload" "$WEBHOOK_URL"
+
+      - name: Ntfy
+        if: ${{ secrets.NTFY_URL != '' }}
+        env:
+          NTFY_URL: ${{ secrets.NTFY_URL }}
+          TITLE: ${{ inputs.title }}
+          MESSAGE: ${{ inputs.message }}
+          STATUS: ${{ inputs.status }}
+        run: |
+          set -euo pipefail
+          priority=$( [ "$STATUS" = "success" ] && echo "default" || echo "high" )
+          tags=$( [ "$STATUS" = "success" ] && echo "white_check_mark" || echo "x" )
+          curl -sS -f \
+            -H "Title: $TITLE" \
+            -H "Priority: $priority" \
+            -H "Tags: $tags" \
+            -d "$MESSAGE" \
+            "$NTFY_URL"
+
+      - name: Telegram
+        if: ${{ secrets.TELEGRAM_BOT_TOKEN != '' && secrets.TELEGRAM_CHAT_ID != '' }}
+        env:
+          BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          TITLE: ${{ inputs.title }}
+          MESSAGE: ${{ inputs.message }}
+        run: |
+          set -euo pipefail
+          text=$(printf "<b>%s</b>\n%s" "$TITLE" "$MESSAGE")
+          payload=$(jq -n \
+            --arg chat_id "$CHAT_ID" \
+            --arg text "$text" \
+            '{chat_id: $chat_id, text: $text, parse_mode: "HTML"}')
+          curl -sS -f -H "Content-Type: application/json" \
+            -d "$payload" \
+            "https://api.telegram.org/bot${BOT_TOKEN}/sendMessage"
+
+      - name: Email
+        if: ${{ secrets.SMTP_SERVER != '' }}
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: ${{ secrets.SMTP_SERVER }}
+          server_port: ${{ secrets.SMTP_PORT }}
+          username: ${{ secrets.SMTP_USERNAME }}
+          password: ${{ secrets.SMTP_PASSWORD }}
+          subject: ${{ inputs.title }}
+          body: ${{ inputs.message }}
+          to: ${{ secrets.NOTIFY_EMAIL }}
+          from: ${{ secrets.SMTP_FROM }}

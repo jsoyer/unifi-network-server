@@ -19,7 +19,6 @@ permissions:
 
 env:
   TEST_TAG: jsoyer/unifi-network-server:test
-  PKGURL: https://dl.ui.com/unifi/10.1.85/unifi_sysvinit_all.deb
 
 jobs:
   build:
@@ -58,7 +57,7 @@ jobs:
 
       - name: Smoke test
         run: |
-          docker run -d --env PKGURL --rm --name unifitest ${{ env.TEST_TAG }}
+          docker run -d --rm --name unifitest ${{ env.TEST_TAG }}
           sleep 35
           for i in $(seq 1 10); do
             status=$(docker inspect --format='{{json .State.Health.Status}}' unifitest)
@@ -125,3 +124,13 @@ jobs:
       - name: Attach SBOM to image
         run: |
           cosign attach sbom --sbom sbom.spdx.json ghcr.io/${{ github.repository }}@${{ steps.build.outputs.digest }}
+
+  notify:
+    needs: build
+    if: ${{ always() }}
+    uses: ./.github/workflows/notify.yml
+    secrets: inherit
+    with:
+      status: ${{ needs.build.result }}
+      title: "Docker publish: ${{ needs.build.result }}"
+      message: "${{ needs.build.result == 'success' && 'Image published to GHCR and DockerHub.' || 'Docker publish failed.' }}\n${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"

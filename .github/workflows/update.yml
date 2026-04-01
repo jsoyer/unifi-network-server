@@ -16,6 +16,9 @@ permissions:
 jobs:
   update-unifi:
     runs-on: ubuntu-latest
+    outputs:
+      changed: ${{ steps.git_diff.outputs.changed }}
+      version: ${{ steps.update.outputs.version }}
 
     steps:
       - name: Checkout repo
@@ -63,3 +66,13 @@ jobs:
           labels: |
             automated
             dependencies
+
+  notify:
+    needs: update-unifi
+    if: ${{ needs.update-unifi.outputs.changed == 'true' }}
+    uses: ./.github/workflows/notify.yml
+    secrets: inherit
+    with:
+      status: success
+      title: "UniFi v${{ needs.update-unifi.outputs.version }} available"
+      message: "A PR has been created to update UniFi Network Application to v${{ needs.update-unifi.outputs.version }}.\nhttps://github.com/${{ github.repository }}/pulls"

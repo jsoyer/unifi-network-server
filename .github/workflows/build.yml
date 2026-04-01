@@ -6,7 +6,6 @@ on:
 
 env:
   TEST_TAG: jsoyer/unifi-network-server:test
-  PKGURL: https://dl.ui.com/unifi/10.1.85/unifi_sysvinit_all.deb
   IMAGE: ghcr.io/jsoyer/unifi-network-server
 
 jobs:
@@ -34,7 +33,7 @@ jobs:
 
       - name: Smoke test
         run: |
-          docker run -d --env PKGURL --rm --name unifitest ${{ env.TEST_TAG }}
+          docker run -d --rm --name unifitest ${{ env.TEST_TAG }}
           sleep 35
           for i in $(seq 1 10); do
             status=$(docker inspect --format='{{json .State.Health.Status}}' unifitest)
@@ -69,3 +68,13 @@ jobs:
           labels: |
             org.opencontainers.image.source=${{ github.event.repository.clone_url }}
             org.opencontainers.image.revision=${{ github.sha }}
+
+  notify:
+    needs: build
+    if: ${{ failure() }}
+    uses: ./.github/workflows/notify.yml
+    secrets: inherit
+    with:
+      status: failure
+      title: "Build failed on PR #${{ github.event.number }}"
+      message: "Docker build or tests failed for PR #${{ github.event.number }}.\n${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
