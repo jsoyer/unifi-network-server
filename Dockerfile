@@ -34,7 +34,8 @@ ENV BASEDIR=/usr/lib/unifi \
 # This should be integrated with the main run because it duplicates a lot of the steps there
 # but for now while shoehorning gosu in it is seperate
 RUN set -eux; \
-    apt-get update; \
+    printf 'Acquire::Retries "5";\nAcquire::http::Timeout "30";\nAcquire::https::Timeout "30";\n' > /etc/apt/apt.conf.d/80-retries; \
+    for i in 1 2 3 4 5; do apt-get update && break || sleep 15; done; \
     apt-get install -y gosu python3; \
     rm -rf /var/lib/apt/lists/*
 
