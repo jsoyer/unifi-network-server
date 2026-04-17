@@ -10,7 +10,7 @@ LABEL maintainer="Jerome Soyer <jeromesoyer@gmail.com>"
 
 ARG DEBIAN_FRONTEND=noninteractive
 
-ARG PKGURL=https://dl.ui.com/unifi/10.2.105/unifi_sysvinit_all.deb
+ARG PKGURL=https://dl.ui.com/unifi/10.3.55/unifi_sysvinit_all.deb
 
 ENV BASEDIR=/usr/lib/unifi \
     DATADIR=/unifi/data \
