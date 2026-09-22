@@ -17,7 +17,7 @@ This is a fork of [jacobalberty/unifi-docker](https://github.com/jacobalberty/un
 
 | Tag | Description | Changelog |
 |---------------------------------------------------------------------------------------------|---------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------|
-| [`latest` `v10.6.101`](https://github.com/jsoyer/unifi-network-server/blob/master/Dockerfile) | Current Stable: Version 10.6.101 as of 2026-08-26 | [Change Log 10.6.101](https://community.ui.com/releases/UniFi-Network-Application-10-6-101/05283624-0980-4dd7-b8d6-9fa5c4e28da4) |
+| [`latest` `v10.6.106`](https://github.com/jsoyer/unifi-network-server/blob/master/Dockerfile) | Current Stable: Version 10.6.106 as of 2026-09-10 | [Change Log 10.6.106](https://community.ui.com/releases/UniFi-Network-Application-10-6-106/f206c01d-3f73-471b-b4a5-2da48f157ea6) |
 | [`stable-6`](https://github.com/jsoyer/unifi-network-server/blob/stable-6/Dockerfile) | Final stable version 6 (6.5.55) | [Change Log 6.5.55](https://community.ui.com/releases/UniFi-Network-Application-6-5-55/48c64137-4a4a-41f7-b7e4-3bee505ae16e) |
 | [`stable-5`](https://github.com/jsoyer/unifi-network-server/blob/stable-5/Dockerfile) | Final stable version 5 (5.14.23) | [Change Log 5.14.23](https://community.ui.com/releases/UniFi-Network-Controller-5-14-23/daf90732-30ad-48ee-81e7-1dcb374eba2a) |
 
