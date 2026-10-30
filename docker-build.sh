@@ -47,6 +47,7 @@ if curl --fail -L -o ./unifi.deb "${1}" && dpkg-deb --info ./unifi.deb >/dev/nul
     apt -qy install ./unifi.deb
 elif [[ "${1}" == https://dl.ui.com/unifi/* ]]; then
     echo "Direct UniFi package download was invalid; installing from the configured APT repository"
+    apt-get update
     apt-get install -qy unifi
 else
     echo "Downloaded package from ${1} is invalid" >&2
