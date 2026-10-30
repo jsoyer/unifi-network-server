@@ -43,8 +43,15 @@ if [ -d "/usr/local/docker/pre_build/$(dpkg --print-architecture)" ]; then
     find "/usr/local/docker/pre_build/$(dpkg --print-architecture)" -type f -exec '{}' \;
 fi
 
-curl -L -o ./unifi.deb "${1}"
-apt -qy install ./unifi.deb
+if curl --fail -L -o ./unifi.deb "${1}" && dpkg-deb --info ./unifi.deb >/dev/null 2>&1; then
+    apt -qy install ./unifi.deb
+elif [[ "${1}" == https://dl.ui.com/unifi/* ]]; then
+    echo "Direct UniFi package download was invalid; installing from the configured APT repository"
+    apt-get install -qy unifi
+else
+    echo "Downloaded package from ${1} is invalid" >&2
+    exit 1
+fi
 rm -f ./unifi.deb
 chown -R unifi:unifi /usr/lib/unifi
 rm -rf /var/lib/apt/lists/*
