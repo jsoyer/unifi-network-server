@@ -10,7 +10,7 @@ LABEL maintainer="Jerome Soyer <jeromesoyer@gmail.com>"
 
 ARG DEBIAN_FRONTEND=noninteractive
 
-ARG PKGURL=https://dl.ui.com/unifi/11.0.97/unifi_sysvinit_all.deb
+ARG PKGURL=https://fw-download.ubnt.com/data/unifi-controller/9f76-debian-10.6.109-4677f4e1-43c8-4302-ad07-de4a0af832c9.deb
 
 ENV BASEDIR=/usr/lib/unifi \
     DATADIR=/unifi/data \

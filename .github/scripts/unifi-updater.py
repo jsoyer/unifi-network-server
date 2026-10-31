@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
+import json
 import urllib.request
 import xml.etree.ElementTree as ET
 import re
 import sys
-import email.utils
 from datetime import datetime, timezone
 
 FEED_URL = "https://community.ui.com/rss/releases/UniFi-Network-Application/e6712595-81bb-4829-8e42-9e2630fabcfe"
@@ -19,90 +19,60 @@ def fetch(url: str) -> bytes:
         return resp.read()
 
 
-def parse_rss_latest(feed_bytes):
-    """
-    Parse the RSS feed and pick the newest release.
+FIRMWARE_API = (
+    "https://fw-update.ubnt.com/api/firmware-latest"
+    "?filter=eq~~product~~unifi-controller"
+    "&filter=eq~~channel~~release"
+)
+VERSION_RE = re.compile(r"(\d+\.\d+\.\d+)")
 
-    Priority:
-    1. Stable (no 'beta', 'rc', or 'release candidate' in title)
-    2. RC (no 'beta' in title)
-    3. Any entry with a version, as a last resort
+
+def latest_debian_release(api_bytes):
     """
+    Return the latest self-hosted Debian release published by Ubiquiti.
+
+    The community RSS feed also announces releases that are not shipped as a
+    self-hosted Linux package (e.g. UniFi OS only builds), so the firmware API
+    is the source of truth for what can actually be installed.
+    """
+    data = json.loads(api_bytes)
+    firmware = data.get("_embedded", {}).get("firmware", [])
+    debs = [f for f in firmware if f.get("platform") == "debian"]
+    if not debs:
+        raise RuntimeError("No Debian release found in UniFi firmware API")
+
+    fw = max(
+        debs,
+        key=lambda f: (f["version_major"], f["version_minor"], f["version_patch"]),
+    )
+    version = f"{fw['version_major']}.{fw['version_minor']}.{fw['version_patch']}"
+    url = fw["_links"]["data"]["href"]
+    if not url.startswith("https://") or not url.endswith(".deb"):
+        raise RuntimeError(f"Unexpected Debian package URL from firmware API: {url}")
+
+    date_str = (fw.get("created") or "")[:10]
+    return {"version": version, "url": url, "date": date_str}
+
+
+def changelog_link(feed_bytes, version):
+    """Find the community release notes link for a given version in the RSS feed."""
     root = ET.fromstring(feed_bytes)
-    items = root.findall(".//item")
-    if not items:
-        raise RuntimeError("No <item> entries in RSS feed")
-
-    releases = []
-
-    for item in items:
-        title_el = item.find("title")
-        link_el = item.find("link")
-        date_el = item.find("pubDate")
-
-        if title_el is None or link_el is None:
-            continue
-
-        title = (title_el.text or "").strip()
-        link = (link_el.text or "").strip()
-        date_raw = (date_el.text or "").strip() if date_el is not None else ""
-
-        # Try to extract version like 10.0.160 or 9.5.21
-        m = re.search(r"(\d+\.\d+\.\d+)", title)
-        if not m:
-            # Fallback to 2-part versions like 10.0
-            m = re.search(r"(\d+\.\d+)", title)
-        if not m:
-            continue
-
-        version = m.group(1)
-
-        if date_raw:
-            try:
-                dt = email.utils.parsedate_to_datetime(date_raw)
-                date_str = dt.date().isoformat()
-            except Exception:
-                date_str = ""
-        else:
-            date_str = ""
-
-        releases.append(
-            {
-                "title": title,
-                "title_lc": title.lower(),
-                "version": version,
-                "link": link,
-                "date": date_str,
-            }
-        )
-
-    if not releases:
-        raise RuntimeError("No releases with a recognizable version found in RSS feed")
-
-    # 1. Prefer "stable" (no beta/rc)
-    stable = [
-        r
-        for r in releases
-        if not any(tag in r["title_lc"] for tag in ("beta", " rc", "release candidate"))
-    ]
-    if stable:
-        return stable[0]
-
-    # 2. Fallback: allow RCs but still skip explicit "beta"
-    rc = [r for r in releases if "beta" not in r["title_lc"]]
-    if rc:
-        return rc[0]
-
-    # 3. Last resort: whatever is first in the feed
-    return releases[0]
+    for item in root.findall(".//item"):
+        m = VERSION_RE.search(item.findtext("title") or "")
+        if m and m.group(1) == version:
+            return (item.findtext("link") or "").strip()
+    return ""
 
 
-def build_pkgurl(version: str) -> str:
-    """
-    Construct the expected sysvinit .deb URL from the version.
-    Example: 9.5.21 -> https://dl.ui.com/unifi/9.5.21/unifi_sysvinit_all.deb
-    """
-    return f"https://dl.ui.com/unifi/{version}/unifi_sysvinit_all.deb"
+def assert_downloadable(url: str) -> None:
+    req = urllib.request.Request(
+        url,
+        method="HEAD",
+        headers={"User-Agent": "Mozilla/5.0 (GitHub Actions UniFi Updater)"},
+    )
+    with urllib.request.urlopen(req, timeout=30) as resp:
+        if resp.status != 200:
+            raise RuntimeError(f"Package URL returned HTTP {resp.status}: {url}")
 
 
 def update_dockerfile(url: str) -> None:
@@ -152,16 +122,21 @@ def update_readme(version: str, date_str: str, link: str) -> None:
 
 
 def main() -> None:
-    feed = fetch(FEED_URL)
-    rel = parse_rss_latest(feed)
-
+    rel = latest_debian_release(fetch(FIRMWARE_API))
     version = rel["version"]
-    link = rel["link"]
-    date_str = rel["date"] or datetime.now(timezone.utc)
+    assert_downloadable(rel["url"])
 
-    pkg_url = build_pkgurl(version)
+    try:
+        link = changelog_link(fetch(FEED_URL), version)
+    except Exception as exc:  # RSS is only used for the changelog link
+        print(f"warning: could not read release RSS feed: {exc}", file=sys.stderr)
+        link = ""
+    if not link:
+        link = f"https://community.ui.com/releases?q={version}"
 
-    update_dockerfile(pkg_url)
+    date_str = rel["date"] or datetime.now(timezone.utc).date().isoformat()
+
+    update_dockerfile(rel["url"])
     update_readme(version, date_str, link)
 
     # Printed so GitHub Actions step can capture it
